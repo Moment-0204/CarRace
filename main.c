@@ -42,13 +42,11 @@
 #include <xc.h>
 
 
-int Xangle, Yangle, j, l, i = 3, k = 7, m;
+int Xangle, Yangle, j=0, l=0, i = 3, k = 7, m;
 char buf[5];
 int ans, point, pointa, maxa, maxb, maxc, count, flag, q = 1, another = 1;
 
-int pi, pj;
-
-int checkgit = 460;
+char pi, pj;
 
 void trans();
 void setup();
@@ -61,13 +59,13 @@ void copy();
 void swap(char[]);
 
 void RandInit(int seed) {
-    T4CON = 0x01111011;
-    PR4 = 255;
+    T4CON = 0b01111011;
+    PR4 = 254;
     TMR4 = seed;
     T4CONbits.TMR4ON = 1;
 }
 
-int Rand(int div) {
+char Rand(char div) {
     return TMR4 % div;
 }
 
@@ -144,7 +142,7 @@ void accele() {
     x1 = 0;
     y1 = 0;
     z1 = 0;
-    for (int l = 0; l < 10; l++) {
+    for (int lcoun = 0; lcoun < 10; lcoun++) {
         acceler_Read(&x, &y, &z);
         x1 += x;
         y1 += y;
@@ -175,7 +173,6 @@ void interrupt Timer(void) {
         BCLIF = 0;
     } else if (T0IF == 1) {
         if (another == 0) {
-            T0IF = 0;
             j = (j + 1) % 10;
             l = (l + 1) % 400;
             m = (m + 1) % 20;
@@ -202,9 +199,10 @@ void interrupt Timer(void) {
             if (m == 0) {
                 q = 1 - q;
                 point++;
-                int a = Rand(8);
+                char a = TMR4 % 8;
+                TMR4 -= point;
                 char new[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-                if (q)new[a] = 1;
+                if (q == 1)new[a] = 1;
 
                 for (int p = 6; p >= 0; p--) {
                     for (int o = 0; o < 8; o++) {
@@ -222,8 +220,9 @@ void interrupt Timer(void) {
                 }
             }
             data[7][i] = 2;
+            T0IF = 0;
         }
-        if (another) {
+        if (another == 1) {
             T0IF = 0;
             j = (j + 1) % 10;
             l = (l + 1) % 400;
@@ -250,13 +249,46 @@ void interrupt Timer(void) {
             }
             if (k == pi && i == pj) {
                 pointa += 60;
-                pi = Rand(8);
-                pj = Rand(8);
+                pi = TMR4 % 8;
+                pj = TMR4 % 8;
+                TMR4 -= point;
             }
             point = pointa / 3;
             clear();
             data[pi][pj] = 1;
             data[k][i] = 2;
+        }
+
+        if (another == 2) {
+            j = (j + 1) % 10;
+            l = (l + 1) % 400;
+            m = (m + 1) % 50;
+            if (j == 0) {
+                data[k][1] = 0;
+                if (ifcheck()) {
+                    if (k != 0)k--;
+                } else {
+                    if (m == 0 && k != 7)k++;
+                }
+            }
+            if (l % 100 == 0) {
+                for (int di = 0; di < 8; di++) {
+                    for (int dj = 1; dj < 7; dj++) {
+                        if (data[dj][di] == 1) {
+                            data[dj][di] = 0;
+                            data[dj][di - 1] = 1;
+                        }
+                    }
+                }
+                if (l == 0) {
+                    data[(TMR4 % 6) + 1][7] = 1;
+                    point++;
+                    TMR4 -= point;
+                }
+            }
+            if (data[k][1] == 1)count = 10;
+            data[k][1] = 2;
+            T0IF = 0;
         }
     }
 }
@@ -289,32 +321,6 @@ int main(int argc, char** argv) {
     maxc = eeprom_read(5) * 256 + eeprom_read(6);
 
 
-    while (0) {
-        accele();
-        if (Xangle + 180 < 181) {
-            for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = sela[i][j];
-            buf[0] = 0;
-            buf[1] = 0;
-            buf[2] = maxa / 256;
-            buf[3] = maxa % 256;
-            buf[4] = 46;
-            ans = I2C_Send2(46, 5, buf);
-        } else {
-            for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = selb[i][j];
-            buf[0] = 0;
-            buf[1] = 0;
-            buf[2] = maxb / 256;
-            buf[3] = maxb % 256;
-            buf[4] = 46;
-            ans = I2C_Send2(46, 5, buf);
-        }
-        int wait = 46;
-        while (wait > 0) {
-            show();
-            wait--;
-        }
-    }
-
     another = 0;
 
     int precount = 0;
@@ -330,6 +336,14 @@ int main(int argc, char** argv) {
             for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = selc[i][j];
             show();
             trans();
+            if (ifcheck()) {
+                start();
+                while (flag == 1) {
+                    accele();
+                    show();
+                    trans();
+                }
+            }
         } else if (Xangle > 0) {
             for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = selb[i][j];
             another = 1;
@@ -419,6 +433,7 @@ void start() {
 
         T0IE = 1;
     } else {
+        LATBbits.LATB3 = 1;
         point = 0;
         pointa = 0;
         buf[4] = 46;
@@ -432,6 +447,12 @@ void start() {
             wait--;
         }
         clear();
+        k = 4;
+
+        for (int di = 0; di < 8; di++) {
+            data[0][di] = 1;
+            data[7][di] = 1;
+        }
 
         T0IE = 1;
     }
@@ -505,8 +526,8 @@ void end() {
             ans = I2C_Send2(46, 5, buf);
             buf[4] = 0;
 
-            eeprom_write(2, maxc / 256);
-            eeprom_write(3, maxc % 256);
+            eeprom_write(5, maxc / 256);
+            eeprom_write(6, maxc % 256);
             fill(2);
             int wait = 460;
             while (wait > 0) {
@@ -523,7 +544,7 @@ void end() {
         }
     }
 
-    eeprom_write(4, TMR4);
+    eeprom_write(4, TMR4 % 256);
 
     count = 0;
 
@@ -581,11 +602,11 @@ void show() {
 }
 
 void clear() {
-    for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = 0;
+    for (int color = 0; color < 8; color++)for (int j = 0; j < 8; j++)data[color][j] = 0;
 }
 
 void fill(char color) {
-    for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = color;
+    for (int colori = 0; colori < 8; colori++)for (int j = 0; j < 8; j++)data[colori][j] = color;
 }
 
 void trans() {
