@@ -48,7 +48,7 @@ int ans, point, pointa, maxa, maxb, count, flag, q = 1, another = 1;
 
 int pi, pj;
 
-int checkgit=46;
+int checkgit=460;
 
 void trans();
 void setup();
