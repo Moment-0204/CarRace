@@ -44,11 +44,11 @@
 
 int Xangle, Yangle, j, l, i = 3, k = 7, m;
 char buf[5];
-int ans, point, pointa, maxa, maxb, count, flag, q = 1, another = 1;
+int ans, point, pointa, maxa, maxb, maxc, count, flag, q = 1, another = 1;
 
 int pi, pj;
 
-int checkgit=460;
+int checkgit = 460;
 
 void trans();
 void setup();
@@ -116,6 +116,28 @@ char selb[8][8] = {
     {0, 0, 0, 0, 0, 0, 0, 0}
 };
 
+char selc[8][8] = {
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 2, 2, 2, 0, 0, 0, 0},
+    {0, 2, 0, 0, 1, 1, 0, 0},
+    {0, 2, 2, 0, 1, 1, 0, 0},
+    {0, 2, 0, 0, 1, 1, 1, 0},
+    {0, 2, 0, 0, 1, 0, 1, 0},
+    {0, 0, 0, 0, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+char seld[8][8] = {
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 1, 1, 1, 0, 0, 0, 0},
+    {0, 1, 0, 0, 2, 2, 0, 0},
+    {0, 1, 1, 0, 2, 2, 0, 0},
+    {0, 1, 0, 0, 2, 2, 2, 0},
+    {0, 1, 0, 0, 2, 0, 2, 0},
+    {0, 0, 0, 0, 2, 2, 2, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0}
+};
+
 void accele() {
     int x1, y1, z1, x2, y2, z2, x, y, z;
 
@@ -137,10 +159,10 @@ void accele() {
     Yangle = (int) (atan2(y2 - 5, z2 - 4) / 3.14159 * 180.0); // Y方向
 }
 
-int ifcheck(){
-    if(PORTBbits.RB2==0){
+int ifcheck() {
+    if (PORTBbits.RB2 == 0) {
         __delay_us(500);
-        if(PORTBbits.RB2==0)return 1;
+        if (PORTBbits.RB2 == 0)return 1;
     }
     return 0;
 }
@@ -255,6 +277,8 @@ int main(int argc, char** argv) {
     //eeprom_write(1,0);
     //eeprom_write(2,0);
     //eeprom_write(3,0);
+    //eeprom_write(5,0);
+    //eeprom_write(6,0);
 
     int seed = eeprom_read(4);
     RandInit(seed);
@@ -262,6 +286,8 @@ int main(int argc, char** argv) {
     point = 46;
     maxa = eeprom_read(0) * 256 + eeprom_read(1);
     maxb = eeprom_read(2) * 256 + eeprom_read(3);
+    maxc = eeprom_read(5) * 256 + eeprom_read(6);
+
 
     while (0) {
         accele();
@@ -291,42 +317,43 @@ int main(int argc, char** argv) {
 
     another = 0;
 
+    int precount = 0;
+
     while (1) {
+        if (LATBbits.LATB3 == 0)LATBbits.LATB3 = 1;
         point = 0;
-        accele();
-        if (Xangle > 0) {
+        precount++;
+        precount %= 30;
+        if (precount == 0)accele();
+        if (Yangle<-80) {
+            another = 2;
+            for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = selc[i][j];
+            show();
+            trans();
+        } else if (Xangle > 0) {
             for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = selb[i][j];
             another = 1;
             show();
             trans();
-            while (Xangle > 0) {
-                accele();
-                show();
-                trans();
-                if (ifcheck()) {
-                    start();
-                    while (flag == 1) {
-                        accele();
-                        show();
-                        trans();
-                    }
+            if (ifcheck()) {
+                start();
+                while (flag == 1) {
+                    accele();
+                    show();
+                    trans();
                 }
             }
-        }
-        if (Xangle <= 0) {
+        } else {
             another = 0;
             for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = sela[i][j];
-            while (Xangle <= 0) {
-                accele();
-                show();
-                trans();
-                if (ifcheck()) {
-                    start();
-                    while (flag == 1) {
-                        accele();
-                        show();
-                        trans();
-                    }
+            show();
+            trans();
+            if (ifcheck()) {
+                start();
+                while (flag == 1) {
+                    accele();
+                    show();
+                    trans();
                 }
             }
         }
@@ -353,6 +380,7 @@ int main(int argc, char** argv) {
 }
 
 void start() {
+    LATBbits.LATB3 = 0;
     if (another == 0) {
         i = 3;
         point = 0;
@@ -368,7 +396,7 @@ void start() {
         }
         clear();
         T0IE = 1;
-    } else {
+    } else if (another == 1) {
         point = 0;
         pointa = 0;
         buf[4] = 46;
@@ -388,6 +416,22 @@ void start() {
         data[pi][pj] = 1;
         data[4][4] = 2;
         if (pi == 4 && pj == 4) data[5][5] = 2;
+
+        T0IE = 1;
+    } else {
+        point = 0;
+        pointa = 0;
+        buf[4] = 46;
+        count = 0;
+        trans();
+        flag = 1;
+        for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = seld[i][j];
+        int wait = 460;
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        clear();
 
         T0IE = 1;
     }
@@ -423,7 +467,7 @@ void end() {
                 wait--;
             }
         }
-    } else {
+    } else if (another == 1) {
         if (point > maxb) {
             maxb = point;
 
@@ -450,12 +494,39 @@ void end() {
                 wait--;
             }
         }
+    } else {
+        if (point > maxc) {
+            maxc = point;
+
+            buf[0] = point / 256;
+            buf[1] = point % 256;
+            buf[2] = maxc / 256;
+            buf[3] = maxc % 256;
+            ans = I2C_Send2(46, 5, buf);
+            buf[4] = 0;
+
+            eeprom_write(2, maxc / 256);
+            eeprom_write(3, maxc % 256);
+            fill(2);
+            int wait = 460;
+            while (wait > 0) {
+                show();
+                wait--;
+            }
+        } else {
+            fill(1);
+            int wait = 460;
+            while (wait > 0) {
+                show();
+                wait--;
+            }
+        }
     }
 
     eeprom_write(4, TMR4);
 
-    count=0;
-    
+    count = 0;
+
     return;
 }
 
@@ -523,11 +594,16 @@ void trans() {
         buf[1] = point % 256;
         buf[2] = maxa / 256;
         buf[3] = maxa % 256;
-    } else {
+    } else if (another == 1) {
         buf[0] = point / 256;
         buf[1] = point % 256;
         buf[2] = maxb / 256;
         buf[3] = maxb % 256;
+    } else {
+        buf[0] = point / 256;
+        buf[1] = point % 256;
+        buf[2] = maxc / 256;
+        buf[3] = maxc % 256;
     }
     ans = I2C_Send2(46, 5, buf);
     buf[4] = 0;
