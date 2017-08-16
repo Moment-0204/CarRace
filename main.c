@@ -42,7 +42,7 @@
 #include <xc.h>
 
 
-int Xangle, Yangle, j=0, l=0, i = 3, k = 7, m;
+int Xangle, Yangle, j = 0, l = 0, i = 3, k = 7, m, wall;
 char buf[5];
 int ans, point, pointa, maxa, maxb, maxc, count, flag, q = 1, another = 1;
 
@@ -260,6 +260,7 @@ void interrupt Timer(void) {
         }
 
         if (another == 2) {
+            wall = (wall + 1) % 400;
             j = (j + 1) % 10;
             l = (l + 1) % 400;
             m = (m + 1) % 50;
@@ -271,7 +272,7 @@ void interrupt Timer(void) {
                     if (m == 0 && k != 7)k++;
                 }
             }
-            if (l % 100 == 0) {
+            if (wall % 100 == 0) {
                 for (int di = 0; di < 8; di++) {
                     for (int dj = 1; dj < 7; dj++) {
                         if (data[dj][di] == 1) {
@@ -280,7 +281,7 @@ void interrupt Timer(void) {
                         }
                     }
                 }
-                if (l == 0) {
+                if (wall == 0) {
                     data[(TMR4 % 6) + 1][7] = 1;
                     point++;
                     TMR4 -= point;
