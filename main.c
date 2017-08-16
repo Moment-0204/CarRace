@@ -285,6 +285,8 @@ void interrupt Timer(void) {
                     data[(TMR4 % 6) + 1][7] = 1;
                     point++;
                     TMR4 -= point;
+                } else {
+                    int checkgit = 460;
                 }
             }
             if (data[k][1] == 1)count = 10;
