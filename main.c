@@ -272,7 +272,7 @@ void interrupt Timer(void) {
                     if (m == 0 && k != 7)k++;
                 }
             }
-            if (wall % 100 == 0) {
+            if (wall == 100 || wall == 200 || wall == 300 || wall == 0) {
                 for (int di = 0; di < 8; di++) {
                     for (int dj = 1; dj < 7; dj++) {
                         if (data[dj][di] == 1) {
@@ -281,13 +281,16 @@ void interrupt Timer(void) {
                         }
                     }
                 }
-                if (wall == 0) {
-                    data[(TMR4 % 6) + 1][7] = 1;
-                    point++;
-                    TMR4 -= point;
-                } else {
-                    int checkgit = 460;
-                }
+                for(int di=1;di<7;di++)if(data[di][1]==1)point++;
+            }
+            if (wall == 0) {
+                data[(TMR4 % 6) + 1][7] = 1;
+                for (int di = 1; di < 7; di++)data[di][6] = 0;
+                TMR4 -= point;
+            }
+            //point = 100;
+            for (int di = 1; di < 7; di++) {
+                //if (data[di][7] == 1)point = 800;
             }
             if (data[k][1] == 1)count = 10;
             data[k][1] = 2;
