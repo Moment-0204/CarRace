@@ -42,8 +42,8 @@
 #include <xc.h>
 
 
-int Xangle, Yangle, j = 0, l = 0, i = 3, k = 7, m, wall;
-char buf[5];
+int Xangle, Yangle, j = 0, l = 0, i = 3, k = 7, m, wall, timer;
+char buf[6];
 int ans, point, pointa, maxa, maxb, maxc, count, flag, q = 1, another = 1;
 
 char pi, pj;
@@ -172,6 +172,8 @@ void interrupt Timer(void) {
     } else if (BCLIF == 1) {
         BCLIF = 0;
     } else if (T0IF == 1) {
+        timer--;
+        if (timer < 0)buf[5] = 0;
         if (another == 0) {
             j = (j + 1) % 10;
             l = (l + 1) % 400;
@@ -208,6 +210,8 @@ void interrupt Timer(void) {
                     for (int o = 0; o < 8; o++) {
                         if (p == 6 && o == i) {
                             if (data[6][i] == 1) {
+                                buf[5] = 3;
+                                timer = 15;
                                 point -= 10;
                                 if (point < 0)point = 0;
                             }
@@ -249,6 +253,8 @@ void interrupt Timer(void) {
             }
             if (k == pi && i == pj) {
                 pointa += 60;
+                timer = 15;
+                buf[5] = 1;
                 pi = TMR4 % 8;
                 pj = TMR4 % 8;
                 TMR4 -= point;
@@ -281,12 +287,18 @@ void interrupt Timer(void) {
                         }
                     }
                 }
-                for(int di=1;di<7;di++)if(data[di][1]==1)point++;
-            }
-            if (wall == 0) {
-                data[(TMR4 % 6) + 1][7] = 1;
-                for (int di = 1; di < 7; di++)data[di][6] = 0;
-                TMR4 -= point;
+                for (int di = 1; di < 7; di++) {
+                    if (data[di][1] == 1) {
+                        point++;
+                        timer = 15;
+                        buf[5] = 1;
+                    }
+                }
+                if (wall == 0) {
+                    data[(TMR4 % 6) + 1][7] = 1;
+                    for (int di = 1; di < 7; di++)data[di][6] = 0;
+                    TMR4 -= point;
+                }
             }
             //point = 100;
             for (int di = 1; di < 7; di++) {
@@ -348,6 +360,7 @@ int main(int argc, char** argv) {
                     accele();
                     show();
                     trans();
+                    if (count == 10)end();
                 }
             }
         } else if (Xangle > 0) {
@@ -361,6 +374,7 @@ int main(int argc, char** argv) {
                     accele();
                     show();
                     trans();
+                    if (count == 10)end();
                 }
             }
         } else {
@@ -374,6 +388,7 @@ int main(int argc, char** argv) {
                     accele();
                     show();
                     trans();
+                    if (count == 10)end();
                 }
             }
         }
@@ -409,11 +424,58 @@ void start() {
         trans();
         flag = 1;
         copy();
-        int wait = 460;
+        int wait = 60;
+        buf[5] = 2;
+        trans();
         while (wait > 0) {
             show();
             wait--;
         }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 100;
+        buf[5] = 1;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        buf[5] = 0;
+        trans();
+
         clear();
         T0IE = 1;
     } else if (another == 1) {
@@ -424,11 +486,51 @@ void start() {
         trans();
         flag = 1;
         for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = copya[i][j];
-        int wait = 460;
+        int wait = 60;
+        buf[5] = 0;
+        trans();
         while (wait > 0) {
             show();
             wait--;
         }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 100;
+        buf[5] = 1;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        buf[5] = 0;
+        trans();
+
         clear();
 
         pi = Rand(8);
@@ -447,11 +549,51 @@ void start() {
         trans();
         flag = 1;
         for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = seld[i][j];
-        int wait = 460;
+        int wait = 60;
+        buf[5] = 0;
+        trans();
         while (wait > 0) {
             show();
             wait--;
         }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
+        buf[5] = 0;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 100;
+        buf[5] = 1;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        buf[5] = 0;
+        trans();
+
         clear();
         k = 4;
 
@@ -482,17 +624,25 @@ void end() {
             eeprom_write(1, maxa % 256);
             fill(2);
             int wait = 460;
+            buf[5] = 1;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         } else {
             fill(1);
             int wait = 460;
+            buf[5] = 3;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         }
     } else if (another == 1) {
         if (point > maxb) {
@@ -509,17 +659,25 @@ void end() {
             eeprom_write(3, maxb % 256);
             fill(2);
             int wait = 460;
+            buf[5] = 1;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         } else {
             fill(1);
             int wait = 460;
+            buf[5] = 3;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         }
     } else {
         if (point > maxc) {
@@ -536,17 +694,26 @@ void end() {
             eeprom_write(6, maxc % 256);
             fill(2);
             int wait = 460;
+            int wait = 460;
+            buf[5] = 1;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         } else {
             fill(1);
             int wait = 460;
+            buf[5] = 3;
+            trans();
             while (wait > 0) {
                 show();
                 wait--;
             }
+            buf[5] = 0;
+            trans();
         }
     }
 
@@ -632,9 +799,8 @@ void trans() {
         buf[2] = maxc / 256;
         buf[3] = maxc % 256;
     }
-    ans = I2C_Send2(46, 5, buf);
+    ans = I2C_Send2(46, 6, buf);
     buf[4] = 0;
-    if (count == 10)end();
 
     return;
 }
