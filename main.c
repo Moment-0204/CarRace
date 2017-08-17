@@ -487,6 +487,13 @@ void start() {
         flag = 1;
         for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = copya[i][j];
         int wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
         buf[5] = 0;
         trans();
         while (wait > 0) {
@@ -550,6 +557,13 @@ void start() {
         flag = 1;
         for (int i = 0; i < 8; i++)for (int j = 0; j < 8; j++)data[i][j] = seld[i][j];
         int wait = 60;
+        buf[5] = 2;
+        trans();
+        while (wait > 0) {
+            show();
+            wait--;
+        }
+        wait = 60;
         buf[5] = 0;
         trans();
         while (wait > 0) {
@@ -634,7 +648,7 @@ void end() {
             trans();
         } else {
             fill(1);
-            int wait = 460;
+            int wait = 300;
             buf[5] = 3;
             trans();
             while (wait > 0) {
@@ -669,7 +683,7 @@ void end() {
             trans();
         } else {
             fill(1);
-            int wait = 460;
+            int wait = 300;
             buf[5] = 3;
             trans();
             while (wait > 0) {
@@ -705,7 +719,7 @@ void end() {
             trans();
         } else {
             fill(1);
-            int wait = 460;
+            int wait = 300;
             buf[5] = 3;
             trans();
             while (wait > 0) {
